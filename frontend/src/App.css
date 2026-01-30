@@ -74,6 +74,11 @@
   margin: 0;
 }
 
+.calendar-grid__status {
+  margin: 0 0 1rem;
+  color: #c6cad3;
+}
+
 .slot-morning {
   background: #ff69b4;
   color: #1a1a1a;

@@ -39,6 +39,15 @@ export default function CalendarCell({
   const label = `${appointmentCount} appointment${
     appointmentCount === 1 ? '' : 's'
   }`
+  const clientNames = appointments.map((appointment) => appointment.client_name)
+  const tooltip = appointmentCount
+    ? `Appointments on ${date.split('T')[0]}:\n${clientNames.join('\n')}`
+    : `Available on ${date.split('T')[0]}`
+  const inlineNames =
+    appointmentCount > 0 && appointmentCount <= 2
+      ? clientNames.filter((name, index) => clientNames.indexOf(name) === index)
+      : []
+  const showCount = appointmentCount > 2
 
   return (
     <div
@@ -51,11 +60,19 @@ export default function CalendarCell({
           handleClick()
         }
       }}
+      title={tooltip}
     >
       {appointmentCount === 0 ? (
         <p className="calendar-grid__availability">Available</p>
       ) : (
-        <p className="calendar-grid__count">{label}</p>
+        <>
+          {showCount && <p className="calendar-grid__count">{label}</p>}
+          {inlineNames.map((name, index) => (
+            <p key={name} className="calendar-grid__count">
+              {appointmentCount === 2 ? `${index + 1}. ${name}` : name}
+            </p>
+          ))}
+        </>
       )}
     </div>
   )
