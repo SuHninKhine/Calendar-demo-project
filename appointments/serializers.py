@@ -21,6 +21,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
             "postal_code",
             "date",
             "slot",
+            "worker_name",
             "created_at",
             "updated_at",
             "district",

@@ -19,6 +19,7 @@ class Appointment(models.Model):
     postal_code = models.CharField(max_length=6, validators=[validate_postal_code])
     date = models.DateField()
     slot = models.CharField(max_length=10, choices=SlotChoices.choices)
+    worker_name = models.CharField(max_length=100, blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
