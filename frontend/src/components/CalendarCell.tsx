@@ -2,8 +2,10 @@ import type { Appointment, TimeSlot } from '../types/appointment'
 
 type CalendarCellProps = {
   appointments: Appointment[]
+  filteredAppointments: Appointment[]
   slot: TimeSlot
   date: string
+  hasFilter: boolean
 }
 
 /**
@@ -11,8 +13,10 @@ type CalendarCellProps = {
  */
 export default function CalendarCell({
   appointments,
+  filteredAppointments,
   slot,
   date,
+  hasFilter,
 }: CalendarCellProps) {
   /**
    * Placeholder click handler for future interactions.
@@ -35,23 +39,29 @@ export default function CalendarCell({
     return 'slot-evening'
   }
 
-  const appointmentCount = appointments.length
-  const label = `${appointmentCount} appointment${
-    appointmentCount === 1 ? '' : 's'
-  }`
-  const clientNames = appointments.map((appointment) => appointment.client_name)
-  const tooltip = appointmentCount
+  const totalAppointments = appointments.length
+  const visibleAppointments = hasFilter ? filteredAppointments : appointments
+  const visibleCount = visibleAppointments.length
+  const label = `${visibleCount} appointment${visibleCount === 1 ? '' : 's'}`
+  const clientNames = visibleAppointments.map(
+    (appointment) => appointment.client_name,
+  )
+  const tooltip = visibleCount
     ? `Appointments on ${date.split('T')[0]}:\n${clientNames.join('\n')}`
     : `Available on ${date.split('T')[0]}`
   const inlineNames =
-    appointmentCount > 0 && appointmentCount <= 2
+    visibleCount > 0 && visibleCount <= 2
       ? clientNames.filter((name, index) => clientNames.indexOf(name) === index)
       : []
-  const showCount = appointmentCount > 2
+  const showCount = visibleCount > 2
+  const isHighlighted = hasFilter && visibleCount > 0
+  const isFaded = hasFilter && visibleCount === 0 && totalAppointments > 0
 
   return (
     <div
-      className={`calendar-grid__cell ${getSlotClass(slot)}`}
+      className={`calendar-grid__cell ${getSlotClass(slot)}${
+        isHighlighted ? ' calendar-grid__cell--highlight' : ''
+      }${isFaded ? ' calendar-grid__cell--faded' : ''}`}
       role="button"
       tabIndex={0}
       onClick={handleClick}
@@ -62,14 +72,14 @@ export default function CalendarCell({
       }}
       title={tooltip}
     >
-      {appointmentCount === 0 ? (
+      {visibleCount === 0 ? (
         <p className="calendar-grid__availability">Available</p>
       ) : (
         <>
           {showCount && <p className="calendar-grid__count">{label}</p>}
           {inlineNames.map((name, index) => (
             <p key={name} className="calendar-grid__count">
-              {appointmentCount === 2 ? `${index + 1}. ${name}` : name}
+              {visibleCount === 2 ? `${index + 1}. ${name}` : name}
             </p>
           ))}
         </>

@@ -1,12 +1,17 @@
 import { Fragment, useMemo } from 'react'
-import type { TimeSlot } from '../types/appointment'
-import { useAppointments } from '../hooks/useAppointments'
+import type { Appointment, TimeSlot } from '../types/appointment'
 import {
   formatDate,
   getAppointmentsForSlot,
   getCurrentWeekDates,
 } from '../utils/calendarHelpers'
 import CalendarCell from './CalendarCell'
+
+type CalendarGridProps = {
+  appointments: Appointment[]
+  filteredAppointments: Appointment[]
+  filterPrefix: string
+}
 
 const slotLabels: { slot: TimeSlot; label: string }[] = [
   { slot: 'MORNING', label: 'Morning' },
@@ -17,9 +22,13 @@ const slotLabels: { slot: TimeSlot; label: string }[] = [
 /**
  * Build a responsive calendar grid with day headers and time slots.
  */
-export default function CalendarGrid() {
-  const { appointments, loading, error } = useAppointments()
+export default function CalendarGrid({
+  appointments,
+  filteredAppointments,
+  filterPrefix,
+}: CalendarGridProps) {
   const weekDates = useMemo(() => getCurrentWeekDates(), [])
+  const hasFilter = filterPrefix.length > 0
 
   /**
    * Derive appointments for a specific date and slot.
@@ -27,42 +36,47 @@ export default function CalendarGrid() {
   const getAppointmentsForCell = (date: Date, slot: TimeSlot) =>
     getAppointmentsForSlot(appointments, date, slot)
 
-  return (
-    <>
-      {loading && (
-        <p className="calendar-grid__status">Loading appointments...</p>
-      )}
-      {error && <p className="calendar-grid__status">{error}</p>}
-      <section className="calendar-grid" aria-label="Appointment calendar grid">
-        <div className="calendar-grid__cell calendar-grid__header">Slot</div>
-        {weekDates.map((day) => (
-          <div
-            key={day.toISOString()}
-            className="calendar-grid__cell calendar-grid__header"
-          >
-            {formatDate(day)}
-          </div>
-        ))}
+  /**
+   * Derive filtered appointments for a specific date and slot.
+   */
+  const getFilteredAppointmentsForCell = (date: Date, slot: TimeSlot) =>
+    getAppointmentsForSlot(filteredAppointments, date, slot)
 
-        {slotLabels.map((slot) => (
-          <Fragment key={slot.slot}>
-            <div
-              key={`${slot.slot}-label`}
-              className="calendar-grid__cell calendar-grid__row-label"
-            >
-              {slot.label}
-            </div>
-            {weekDates.map((day) => (
-              <CalendarCell
-                key={`${day.toISOString()}-${slot.slot}`}
-                appointments={getAppointmentsForCell(day, slot.slot)}
-                slot={slot.slot}
-                date={day.toISOString()}
-              />
-            ))}
-          </Fragment>
-        ))}
-      </section>
-    </>
+  return (
+    <section className="calendar-grid" aria-label="Appointment calendar grid">
+      <div className="calendar-grid__cell calendar-grid__header">Slot</div>
+      {weekDates.map((day) => (
+        <div
+          key={day.toISOString()}
+          className="calendar-grid__cell calendar-grid__header"
+        >
+          {formatDate(day)}
+        </div>
+      ))}
+
+      {slotLabels.map((slot) => (
+        <Fragment key={slot.slot}>
+          <div
+            key={`${slot.slot}-label`}
+            className="calendar-grid__cell calendar-grid__row-label"
+          >
+            {slot.label}
+          </div>
+          {weekDates.map((day) => (
+            <CalendarCell
+              key={`${day.toISOString()}-${slot.slot}`}
+              appointments={getAppointmentsForCell(day, slot.slot)}
+              filteredAppointments={getFilteredAppointmentsForCell(
+                day,
+                slot.slot,
+              )}
+              slot={slot.slot}
+              date={day.toISOString()}
+              hasFilter={hasFilter}
+            />
+          ))}
+        </Fragment>
+      ))}
+    </section>
   )
 }

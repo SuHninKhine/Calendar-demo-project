@@ -1,5 +1,5 @@
 import './App.css'
-import CalendarGrid from './components/CalendarGrid'
+import FilteredCalendarGrid from './components/FilteredCalendarGrid'
 
 /**
  * Root application shell for the appointment calendar.
@@ -13,7 +13,7 @@ function App() {
           Track bookings across morning, afternoon, and evening slots.
         </p>
       </header>
-      <CalendarGrid />
+      <FilteredCalendarGrid />
     </div>
   )
 }

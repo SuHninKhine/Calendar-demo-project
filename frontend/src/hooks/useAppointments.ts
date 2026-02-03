@@ -13,6 +13,7 @@ type UseAppointmentsResult = {
   loading: boolean
   error: string | null
   refetch: () => Promise<void>
+  filterByPostalPrefix: (prefix: string) => Appointment[]
 }
 
 /**
@@ -54,5 +55,23 @@ export const useAppointments = (): UseAppointmentsResult => {
     void fetchAppointments()
   }, [])
 
-  return { appointments, loading, error, refetch: fetchAppointments }
+  /**
+   * Filter appointments by the provided postal prefix.
+   */
+  const filterByPostalPrefix = (prefix: string): Appointment[] => {
+    if (!prefix) {
+      return appointments
+    }
+    return appointments.filter((appointment) =>
+      appointment.postal_code.startsWith(prefix),
+    )
+  }
+
+  return {
+    appointments,
+    loading,
+    error,
+    refetch: fetchAppointments,
+    filterByPostalPrefix,
+  }
 }
