@@ -14,6 +14,7 @@ type UseAppointmentsResult = {
   error: string | null
   refetch: () => Promise<void>
   filterByPostalPrefix: (prefix: string) => Appointment[]
+  assignAppointment: (appointmentId: number, workerName: string) => Promise<void>
 }
 
 /**
@@ -67,11 +68,43 @@ export const useAppointments = (): UseAppointmentsResult => {
     )
   }
 
+  /**
+   * Assign a worker to an appointment and sync with the API.
+   */
+  const assignAppointment = async (
+    appointmentId: number,
+    workerName: string,
+  ) => {
+    const trimmedName = workerName.trim()
+    if (!trimmedName) {
+      return
+    }
+    const previousAppointments = [...appointments]
+    setAppointments((current) =>
+      current.map((appointment) =>
+        appointment.id === appointmentId
+          ? { ...appointment, worker_name: trimmedName }
+          : appointment,
+      ),
+    )
+    try {
+      await api.patch(`/appointments/${appointmentId}/`, {
+        worker_name: trimmedName,
+      })
+      setError(null)
+    } catch (err) {
+      setAppointments(previousAppointments)
+      setError('Failed to assign appointment')
+      console.error(err)
+    }
+  }
+
   return {
     appointments,
     loading,
     error,
     refetch: fetchAppointments,
     filterByPostalPrefix,
+    assignAppointment,
   }
 }
