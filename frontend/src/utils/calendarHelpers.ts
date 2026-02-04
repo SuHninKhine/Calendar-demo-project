@@ -1,10 +1,20 @@
 import type { Appointment, TimeSlot } from '../types/appointment'
 
 /**
- * Get the current week dates (Monday through Sunday).
+ * Convert a Date into a YYYY-MM-DD string using local time.
  */
-export const getCurrentWeekDates = (): Date[] => {
-  const today = new Date()
+export const toDateKey = (date: Date): string => {
+  const year = date.getFullYear()
+  const month = `${date.getMonth() + 1}`.padStart(2, '0')
+  const day = `${date.getDate()}`.padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+/**
+ * Get week dates (Monday through Sunday) for a reference date.
+ */
+export const getWeekDatesFor = (referenceDate: Date): Date[] => {
+  const today = new Date(referenceDate)
   const dayOfWeek = today.getDay()
   const monday = new Date(today)
   monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
@@ -17,6 +27,11 @@ export const getCurrentWeekDates = (): Date[] => {
 }
 
 /**
+ * Get the current week dates (Monday through Sunday).
+ */
+export const getCurrentWeekDates = (): Date[] => getWeekDatesFor(new Date())
+
+/**
  * Filter appointments by date and slot.
  */
 export const getAppointmentsForSlot = (
@@ -24,7 +39,7 @@ export const getAppointmentsForSlot = (
   date: Date,
   slot: TimeSlot,
 ): Appointment[] => {
-  const dateStr = date.toISOString().split('T')[0]
+  const dateStr = toDateKey(date)
   return appointments.filter(
     (appointment) => appointment.date === dateStr && appointment.slot === slot,
   )
@@ -39,3 +54,21 @@ export const formatDate = (date: Date): string =>
     day: 'numeric',
     month: 'short',
   })
+
+/**
+ * Format a week range label (e.g., "Feb 3 - Feb 9").
+ */
+export const formatWeekRange = (weekDates: Date[]): string => {
+  if (!weekDates.length) {
+    return ''
+  }
+  const start = weekDates[0].toLocaleDateString('en-SG', {
+    month: 'short',
+    day: 'numeric',
+  })
+  const end = weekDates[weekDates.length - 1].toLocaleDateString('en-SG', {
+    month: 'short',
+    day: 'numeric',
+  })
+  return `${start} - ${end}`
+}

@@ -1,19 +1,19 @@
 import './App.css'
-import FilteredCalendarGrid from './components/FilteredCalendarGrid'
+import DispatchDashboard from './components/DispatchDashboard'
 
 /**
- * Root application shell for the appointment calendar.
+ * Root application shell for the dispatch dashboard.
  */
 function App() {
   return (
     <div className="app">
       <header className="app__header">
-        <h1 className="app__title">Appointment Calendar</h1>
+        <h1 className="app__title">Dispatch Dashboard</h1>
         <p className="app__subtitle">
-          Track bookings across morning, afternoon, and evening slots.
+          Assign cleaners, monitor utilization, and balance district load.
         </p>
       </header>
-      <FilteredCalendarGrid />
+      <DispatchDashboard />
     </div>
   )
 }

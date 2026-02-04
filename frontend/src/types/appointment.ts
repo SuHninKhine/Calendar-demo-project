@@ -7,6 +7,7 @@ export interface Appointment {
   date: string;
   slot: 'MORNING' | 'AFTERNOON' | 'EVENING';
   district: string;
+  worker_name: string | null;
   created_at: string;
   updated_at: string;
 }

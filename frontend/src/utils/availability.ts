@@ -17,9 +17,9 @@ export const getBusyWorkerNames = (
   slot: TimeSlot,
 ): Set<string> => {
   const busyNames = appointments
-    .filter((appointment) => appointment.worker_name?.trim())
+    .filter((appointment) => (appointment.worker_name ?? '').trim())
     .filter((appointment) => appointment.date === date && appointment.slot === slot)
-    .map((appointment) => appointment.worker_name.trim())
+    .map((appointment) => (appointment.worker_name ?? '').trim())
   return new Set(busyNames)
 }
 

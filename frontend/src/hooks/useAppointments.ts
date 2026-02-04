@@ -6,6 +6,7 @@ type AppointmentResponse =
   | Appointment[]
   | {
       results?: Appointment[]
+      next?: string | null
     }
 
 type UseAppointmentsResult = {
@@ -42,7 +43,27 @@ export const useAppointments = (): UseAppointmentsResult => {
     try {
       setLoading(true)
       const response = await api.get<AppointmentResponse>('/appointments/')
-      setAppointments(extractAppointments(response.data))
+      if (Array.isArray(response.data)) {
+        setAppointments(response.data)
+        setError(null)
+        return
+      }
+
+      const collected: Appointment[] = []
+      let nextUrl: string | null | undefined = '/appointments/'
+
+      while (nextUrl) {
+        const pageResponse = await api.get<AppointmentResponse>(nextUrl)
+        if (Array.isArray(pageResponse.data)) {
+          collected.push(...pageResponse.data)
+          nextUrl = null
+        } else {
+          collected.push(...(pageResponse.data.results ?? []))
+          nextUrl = pageResponse.data.next
+        }
+      }
+
+      setAppointments(collected)
       setError(null)
     } catch (err) {
       setError('Failed to fetch appointments')
