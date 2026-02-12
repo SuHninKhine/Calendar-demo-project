@@ -25,6 +25,7 @@ export default function DispatchDashboard() {
   const [activeAppointmentId, setActiveAppointmentId] = useState<number | null>(
     null,
   )
+  const [showUtilizationOnly, setShowUtilizationOnly] = useState(false)
   const weekDates = useMemo(() => {
     const baseDate = new Date()
     baseDate.setDate(baseDate.getDate() + weekOffset * 7)
@@ -76,47 +77,92 @@ export default function DispatchDashboard() {
   return (
     <section className="dispatch-layout">
       <div className="dispatch-top">
+        <div className="dispatch-top__actions">
+          {!showUtilizationOnly ? (
+            <button
+              type="button"
+              className="mobile-utilization-jump"
+              onClick={() => setShowUtilizationOnly(true)}
+            >
+              Cleaner Utilization
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="mobile-utilization-jump"
+              onClick={() => setShowUtilizationOnly(false)}
+            >
+              Back to Dispatch
+            </button>
+          )}
+        </div>
         <DistrictLoadPanel
           appointments={appointments}
           selectedPrefix={selectedPostalPrefix}
           onSelectPrefix={setSelectedPostalPrefix}
         />
       </div>
-      <div className="dispatch-main">
-        <UnassignedQueue
-          appointments={unassignedAppointments}
-          assignedAppointments={assignedAppointments}
-          workers={WORKERS}
-          onAssign={assignAppointment}
-          onSelectAppointment={(appointment) => {
-            setActiveCleanerId(null)
-            setActiveAppointmentId(appointment.id)
-          }}
-          loading={loading}
-          error={error}
-        />
-        <CleanerUtilizationBoard
-          workers={WORKERS}
-          assignedAppointments={assignedAppointments}
-          allAssignedAppointments={allAssignedAppointments}
-          weekDates={weekDates}
-          weekLabel={weekLabel}
-          onPrevWeek={() => setWeekOffset((current) => current - 1)}
-          onNextWeek={() => setWeekOffset((current) => current + 1)}
-          onResetWeek={() => setWeekOffset(0)}
-          onSelectCleaner={(worker) => {
-            setActiveAppointmentId(null)
-            setActiveCleanerId(worker.id)
-          }}
-          onSelectAppointment={(appointment) => {
-            setActiveCleanerId(null)
-            setActiveAppointmentId(appointment.id)
-          }}
-          loading={loading}
-          error={error}
-          selectedPrefix={selectedPostalPrefix}
-        />
-      </div>
+      {showUtilizationOnly ? (
+        <div className="dispatch-main dispatch-main--utilization">
+          <CleanerUtilizationBoard
+            workers={WORKERS}
+            assignedAppointments={assignedAppointments}
+            allAssignedAppointments={allAssignedAppointments}
+            weekDates={weekDates}
+            weekLabel={weekLabel}
+            onPrevWeek={() => setWeekOffset((current) => current - 1)}
+            onNextWeek={() => setWeekOffset((current) => current + 1)}
+            onResetWeek={() => setWeekOffset(0)}
+            onSelectCleaner={(worker) => {
+              setActiveAppointmentId(null)
+              setActiveCleanerId(worker.id)
+            }}
+            onSelectAppointment={(appointment) => {
+              setActiveCleanerId(null)
+              setActiveAppointmentId(appointment.id)
+            }}
+            loading={loading}
+            error={error}
+            selectedPrefix={selectedPostalPrefix}
+          />
+        </div>
+      ) : (
+        <div className="dispatch-main dispatch-main--dispatch">
+          <UnassignedQueue
+            appointments={unassignedAppointments}
+            assignedAppointments={assignedAppointments}
+            workers={WORKERS}
+            onAssign={assignAppointment}
+            onSelectAppointment={(appointment) => {
+              setActiveCleanerId(null)
+              setActiveAppointmentId(appointment.id)
+            }}
+            loading={loading}
+            error={error}
+          />
+          <CleanerUtilizationBoard
+            workers={WORKERS}
+            assignedAppointments={assignedAppointments}
+            allAssignedAppointments={allAssignedAppointments}
+            weekDates={weekDates}
+            weekLabel={weekLabel}
+            onPrevWeek={() => setWeekOffset((current) => current - 1)}
+            onNextWeek={() => setWeekOffset((current) => current + 1)}
+            onResetWeek={() => setWeekOffset(0)}
+            onSelectCleaner={(worker) => {
+              setActiveAppointmentId(null)
+              setActiveCleanerId(worker.id)
+            }}
+            onSelectAppointment={(appointment) => {
+              setActiveCleanerId(null)
+              setActiveAppointmentId(appointment.id)
+            }}
+            loading={loading}
+            error={error}
+            selectedPrefix={selectedPostalPrefix}
+          />
+        </div>
+      )}
       <CleanerDetailsDrawer
         isOpen={Boolean(activeCleanerId)}
         worker={activeCleaner}
