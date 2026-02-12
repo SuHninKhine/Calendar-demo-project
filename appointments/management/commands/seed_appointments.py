@@ -91,6 +91,14 @@ class Command(BaseCommand):
             phone = f"9{(idx + 1000000):07d}"[-8:]
             appointment_date = today + timedelta(days=idx % 21)
             slot = slots[idx % len(slots)]
+            status = (
+                Appointment.StatusChoices.CONFIRMED
+                if worker_name
+                else Appointment.StatusChoices.REQUESTED
+            )
+            payment_id = (
+                f"PAY-{1000 + idx}" if worker_name and idx % 4 == 0 else ""
+            )
             return {
                 "client_name": names[idx % len(names)],
                 "phone": phone,
@@ -99,6 +107,8 @@ class Command(BaseCommand):
                 "date": appointment_date,
                 "slot": slot,
                 "worker_name": worker_name,
+                "status": status,
+                "payment_id": payment_id,
             }
 
         # Create conflict pairs so busy workers appear disabled in dropdowns.

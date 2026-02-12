@@ -7,6 +7,7 @@ type UnassignedQueueProps = {
   assignedAppointments: Appointment[]
   workers: Worker[]
   onAssign: (appointmentId: number, workerName: string) => Promise<void>
+  onSelectAppointment: (appointment: Appointment) => void
   loading: boolean
   error: string | null
 }
@@ -23,6 +24,12 @@ const SLOT_ORDER: Record<TimeSlot, number> = {
   EVENING: 2,
 }
 
+const SLOT_RANGES: Record<TimeSlot, string> = {
+  MORNING: '9:00-12:00',
+  AFTERNOON: '13:00-16:00',
+  EVENING: '18:00-21:00',
+}
+
 /**
  * Render unassigned appointments grouped by date and slot.
  */
@@ -31,6 +38,7 @@ export default function UnassignedQueue({
   assignedAppointments,
   workers,
   onAssign,
+  onSelectAppointment,
   loading,
   error,
 }: UnassignedQueueProps) {
@@ -64,8 +72,7 @@ export default function UnassignedQueue({
       day: 'numeric',
       month: 'short',
     })
-    const slotLabel = slot.toLowerCase()
-    return `${label} • ${slotLabel.charAt(0).toUpperCase()}${slotLabel.slice(1)}`
+    return `${label} | ${SLOT_RANGES[slot]}`
   }
 
   const maskPostal = (postalCode: string) =>
@@ -110,11 +117,20 @@ export default function UnassignedQueue({
                   <article
                     key={appointment.id}
                     className="queue__card"
+                    onClick={() => onSelectAppointment(appointment)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault()
+                        onSelectAppointment(appointment)
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
                   >
                     <div>
                       <p className="queue__client">{appointment.client_name}</p>
                       <p className="queue__meta">
-                        {maskPostal(appointment.postal_code)} •{' '}
+                        {maskPostal(appointment.postal_code)} |{' '}
                         {appointment.district}
                       </p>
                     </div>
@@ -127,6 +143,7 @@ export default function UnassignedQueue({
                         className="queue__select"
                         disabled={!hasAvailable}
                         defaultValue=""
+                        onClick={(event) => event.stopPropagation()}
                         onChange={(event) => {
                           const workerName = event.target.value
                           if (workerName) {

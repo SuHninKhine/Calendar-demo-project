@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { WORKERS } from '../data/workers'
 import { useAppointments } from '../hooks/useAppointments'
 import { formatWeekRange, getWeekDatesFor } from '../utils/calendarHelpers'
+import AppointmentDetailsDrawer from './AppointmentDetailsDrawer'
 import CleanerDetailsDrawer from './CleanerDetailsDrawer'
 import CleanerUtilizationBoard from './CleanerUtilizationBoard'
 import DistrictLoadPanel from './DistrictLoadPanel'
@@ -11,10 +12,19 @@ import UnassignedQueue from './UnassignedQueue'
  * Dispatch dashboard layout with district load, unassigned queue, and utilization.
  */
 export default function DispatchDashboard() {
-  const { appointments, loading, error, assignAppointment } = useAppointments()
+  const {
+    appointments,
+    loading,
+    error,
+    assignAppointment,
+    updateAppointment,
+  } = useAppointments()
   const [selectedPostalPrefix, setSelectedPostalPrefix] = useState('')
   const [weekOffset, setWeekOffset] = useState(0)
   const [activeCleanerId, setActiveCleanerId] = useState<string | null>(null)
+  const [activeAppointmentId, setActiveAppointmentId] = useState<number | null>(
+    null,
+  )
   const weekDates = useMemo(() => {
     const baseDate = new Date()
     baseDate.setDate(baseDate.getDate() + weekOffset * 7)
@@ -56,6 +66,12 @@ export default function DispatchDashboard() {
     () => WORKERS.find((worker) => worker.id === activeCleanerId) ?? null,
     [activeCleanerId],
   )
+  const activeAppointment = useMemo(
+    () =>
+      appointments.find((appointment) => appointment.id === activeAppointmentId) ??
+      null,
+    [appointments, activeAppointmentId],
+  )
 
   return (
     <section className="dispatch-layout">
@@ -72,6 +88,10 @@ export default function DispatchDashboard() {
           assignedAppointments={assignedAppointments}
           workers={WORKERS}
           onAssign={assignAppointment}
+          onSelectAppointment={(appointment) => {
+            setActiveCleanerId(null)
+            setActiveAppointmentId(appointment.id)
+          }}
           loading={loading}
           error={error}
         />
@@ -84,7 +104,14 @@ export default function DispatchDashboard() {
           onPrevWeek={() => setWeekOffset((current) => current - 1)}
           onNextWeek={() => setWeekOffset((current) => current + 1)}
           onResetWeek={() => setWeekOffset(0)}
-          onSelectCleaner={(worker) => setActiveCleanerId(worker.id)}
+          onSelectCleaner={(worker) => {
+            setActiveAppointmentId(null)
+            setActiveCleanerId(worker.id)
+          }}
+          onSelectAppointment={(appointment) => {
+            setActiveCleanerId(null)
+            setActiveAppointmentId(appointment.id)
+          }}
           loading={loading}
           error={error}
           selectedPrefix={selectedPostalPrefix}
@@ -97,6 +124,15 @@ export default function DispatchDashboard() {
         weekDates={weekDates}
         selectedPrefix={selectedPostalPrefix}
         onClose={() => setActiveCleanerId(null)}
+      />
+      <AppointmentDetailsDrawer
+        isOpen={Boolean(activeAppointmentId)}
+        appointment={activeAppointment}
+        workers={WORKERS}
+        assignedAppointments={assignedAppointments}
+        onAssign={assignAppointment}
+        onUpdate={updateAppointment}
+        onClose={() => setActiveAppointmentId(null)}
       />
     </section>
   )

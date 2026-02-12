@@ -6,6 +6,13 @@ from .validators import validate_phone, validate_postal_code
 class Appointment(models.Model):
     """Represents a client appointment booking."""
 
+    class StatusChoices(models.TextChoices):
+        """Lifecycle status for an appointment."""
+
+        REQUESTED = "requested", "Requested"
+        CONFIRMED = "confirmed", "Confirmed"
+        DONE = "done", "Done"
+
     class SlotChoices(models.TextChoices):
         """Available appointment slots."""
 
@@ -20,6 +27,12 @@ class Appointment(models.Model):
     date = models.DateField()
     slot = models.CharField(max_length=10, choices=SlotChoices.choices)
     worker_name = models.CharField(max_length=100, blank=True, default="")
+    status = models.CharField(
+        max_length=10,
+        choices=StatusChoices.choices,
+        default=StatusChoices.REQUESTED,
+    )
+    payment_id = models.CharField(max_length=100, blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

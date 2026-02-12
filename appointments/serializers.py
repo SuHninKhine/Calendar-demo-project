@@ -22,6 +22,8 @@ class AppointmentSerializer(serializers.ModelSerializer):
             "date",
             "slot",
             "worker_name",
+            "status",
+            "payment_id",
             "created_at",
             "updated_at",
             "district",

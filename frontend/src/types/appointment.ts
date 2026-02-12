@@ -8,6 +8,8 @@ export interface Appointment {
   slot: 'MORNING' | 'AFTERNOON' | 'EVENING';
   district: string;
   worker_name: string | null;
+  status: 'requested' | 'confirmed' | 'done';
+  payment_id: string;
   created_at: string;
   updated_at: string;
 }

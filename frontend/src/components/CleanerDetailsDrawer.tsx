@@ -17,6 +17,18 @@ const SLOT_ORDER: Record<TimeSlot, number> = {
   EVENING: 2,
 }
 
+const SLOT_RANGES: Record<TimeSlot, string> = {
+  MORNING: '9:00-12:00',
+  AFTERNOON: '13:00-16:00',
+  EVENING: '18:00-21:00',
+}
+
+const formatAppointmentLine = (appointment: Appointment) =>
+  `${appointment.date} | ${SLOT_RANGES[appointment.slot]}`
+
+const formatAppointmentMeta = (appointment: Appointment) =>
+  `${appointment.client_name} | ${appointment.district}`
+
 /**
  * Drawer showing details for a selected cleaner.
  */
@@ -83,10 +95,8 @@ export default function CleanerDetailsDrawer({
             <ul className="drawer__list">
               {thisWeekAppointments.map((appointment) => (
                 <li key={appointment.id} className="drawer__list-item">
-                  <span>
-                    {appointment.date} · {appointment.slot.toLowerCase()}
-                  </span>
-                  <span>{appointment.client_name}</span>
+                  <span>{formatAppointmentLine(appointment)}</span>
+                  <span>{formatAppointmentMeta(appointment)}</span>
                 </li>
               ))}
             </ul>
@@ -100,12 +110,8 @@ export default function CleanerDetailsDrawer({
             <ul className="drawer__list">
               {upcomingAppointments.map((appointment) => (
                 <li key={appointment.id} className="drawer__list-item">
-                  <span>
-                    {appointment.date} · {appointment.slot.toLowerCase()}
-                  </span>
-                  <span>
-                    {appointment.client_name} · {appointment.district}
-                  </span>
+                  <span>{formatAppointmentLine(appointment)}</span>
+                  <span>{formatAppointmentMeta(appointment)}</span>
                 </li>
               ))}
             </ul>

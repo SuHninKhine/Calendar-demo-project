@@ -16,6 +16,11 @@ type UseAppointmentsResult = {
   refetch: () => Promise<void>
   filterByPostalPrefix: (prefix: string) => Appointment[]
   assignAppointment: (appointmentId: number, workerName: string) => Promise<void>
+  updateAppointment: (
+    appointmentId: number,
+    updates: Partial<Appointment>,
+    errorMessage?: string,
+  ) => Promise<void>
 }
 
 /**
@@ -100,22 +105,35 @@ export const useAppointments = (): UseAppointmentsResult => {
     if (!trimmedName) {
       return
     }
+    await updateAppointment(
+      appointmentId,
+      { worker_name: trimmedName, status: 'confirmed' },
+      'Failed to assign appointment',
+    )
+  }
+
+  /**
+   * Patch appointment fields and sync with the API.
+   */
+  const updateAppointment = async (
+    appointmentId: number,
+    updates: Partial<Appointment>,
+    errorMessage = 'Failed to update appointment',
+  ) => {
     const previousAppointments = [...appointments]
     setAppointments((current) =>
       current.map((appointment) =>
         appointment.id === appointmentId
-          ? { ...appointment, worker_name: trimmedName }
+          ? { ...appointment, ...updates }
           : appointment,
       ),
     )
     try {
-      await api.patch(`/appointments/${appointmentId}/`, {
-        worker_name: trimmedName,
-      })
+      await api.patch(`/appointments/${appointmentId}/`, updates)
       setError(null)
     } catch (err) {
       setAppointments(previousAppointments)
-      setError('Failed to assign appointment')
+      setError(errorMessage)
       console.error(err)
     }
   }
@@ -127,5 +145,6 @@ export const useAppointments = (): UseAppointmentsResult => {
     refetch: fetchAppointments,
     filterByPostalPrefix,
     assignAppointment,
+    updateAppointment,
   }
 }
